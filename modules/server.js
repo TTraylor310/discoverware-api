@@ -1,0 +1,1 @@
+REACT_Smongodb+srv://DiscoveryChannel:Oyi3aBlx7khGep5M@discovery-project-cf301.uaayusd.mongodb.net/?retryWrites=true&w=majority

@@ -2,6 +2,7 @@
 
 .env
 .vscode
+node_modules
 ### Linux ###
 *~
 

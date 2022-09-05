@@ -1,2 +1,1 @@
-PORT=<your port>
-DB_URL=<database_url>
+PROFILE_DB_URL = PROFILE-DB-URL

@@ -4,23 +4,35 @@ const { default: mongoose } = require('mongoose');
 
 require('dotenv').config();
 
-mongoose.connect(process.env.PROFILE_DB_URL);
+mongoose.connect(process.env.LOCATION_DB_URL);
 
-const Profile = require('./modules/profile.js')
+const Location = require('./modules/place.js')
 
 async function seed() {
 
-    await Profile.create({
-        name: 'Name 1',
-        biography: 'description 1'
+    await Location.create({
+        email: 'jacobdang',
+        name: 'seattle',
+        address: '1234 street',
+        image: 'cat',
+        types: ['park', 'restaurant'],
+        lat: 10,
+        lng: 15,
+        place_id: 9876
     })
-    console.log('Person 1 was added')
+    console.log('Location 1 was added')
 
-    await Profile.create({
-        name: 'Name 2',
-        biography: 'description 2'
+    await Location.create({
+        email: 'timtraylor',
+        name: 'bellevue',
+        address: '4321 street',
+        image: 'dog',
+        types: ['restaurant', 'park'],
+        lat: 20,
+        lng: 25,
+        place_id: 4567
     })
-    console.log('Person 2 was added')
+    console.log('Location 2 was added')
 
     mongoose.disconnect();
 }

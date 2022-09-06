@@ -25,7 +25,7 @@ db.once('open', function () { console.log('Mongoose is connected');});
 const Location = require('./modules/place.js')
 
 
-app.get('/test', (req, res) => {
+app.get('/test', (request, response) => {
   res.send('test is good');
 });
 
@@ -36,7 +36,7 @@ app.use(verifyUser);
 app.get('/place', getPlace)
 async function getPlace(request, response, next) {
   try {
-    let results = Location.find({email: req.user.email});
+    let results = Location.find({email: request.user.email});
     response.status(200).send(results);
   } catch (error) {
     next(error);
@@ -50,7 +50,7 @@ async function postPlace(request, response, next) {
   console.log('request.body: ')
   console.table(request.body)
   try {
-    const newPlace = await Location.create({...request.body, email: req.user.email});
+    const newPlace = await Location.create({...request.body, email: request.user.email});
     console.log('newPlace: ')
     console.table(newPlace)
     response.status(201).send(newPlace);
@@ -64,7 +64,7 @@ app.delete('/place/:placeid', deletePlace);
 
 async function deletePlace(request, response, next) {
   const id = request.params.placeid;
-  console.log('id: ')
+  console.log('id: ');
   console.table(id);
   try {
     Location.findByIdAndDelete(id);
@@ -82,7 +82,7 @@ async function putPlace(request, response, next) {
   let id = request.params.placeid;
   try {
     let data = request.body;
-    const updatePlace = Location.findByIdAndUpdate(id, {...request.body, email: req.user.email}, data, {new: true, overwrite: true});
+    const updatePlace = Location.findByIdAndUpdate(id, {...request.body, email: request.user.email}, data, {new: true, overwrite: true});
     response.status(201).send(updatePlace);
   } catch (error) {
     next(error);

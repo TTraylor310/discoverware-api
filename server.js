@@ -6,9 +6,10 @@ const cors = require('cors');
 
 const mongoose = require('mongoose');
 
+const verifyUser = require('./auth.js')
 
-//Database for profile logins
-mongoose.connect(process.env.PROFILE_DB_URL);
+//Database for place logins
+mongoose.connect(process.env.LOCATION_DB_URL);
 
 const app = express();
 
@@ -20,51 +21,53 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () { console.log('Mongoose is connected');});
 
 
-//Sets variable Profile to the Schema of Profile.js
-const Profile = require('./modules/profile.js')
+//Sets variable Location to the Schema of place.js
+const Location = require('./modules/place.js')
 
 
 app.get('/test', (req, res) => {
   res.send('test is good');
 });
 
+//Auth Middleware
+app.use(verifyUser);
 
-//Using profile.js, once profile is LOGGED, this retreives the profile.js data
-app.get('/profile', getProfile)
-async function getProfile(request, response, next) {
+//Using place.js, once place is LOGGED, this retreives the place.js data
+app.get('/place', getPlace)
+async function getPlace(request, response, next) {
   try {
-    let results = await Profile.find();
+    let results = Location.find({email: req.user.email});
     response.status(200).send(results);
   } catch (error) {
     next(error);
   }
 }
 
-//Using profile.js, once the profile is FOUND, this creates the profile.js data
-app.post('/profile', postProfile);
+//Using place.js, once the place is FOUND, this creates the place.js data
+app.post('/place', postPlace);
 
-async function postProfile(request, response, next) {
+async function postPlace(request, response, next) {
   console.log('request.body: ')
   console.table(request.body)
   try {
-    const newProfile = await Profile.create(request.body);
-    console.log('newProfile: ')
-    console.table(newProfile)
-    response.status(201).send(newProfile);
+    const newPlace = await Location.create({...request.body, email: req.user.email});
+    console.log('newPlace: ')
+    console.table(newPlace)
+    response.status(201).send(newPlace);
   } catch (error) {
     next(error);
   }
 }
 
-//Once the profile is FOUND, this finds and DELETES the profile data
-app.delete('/profile/:profileid', deleteProfile);
+//Once the place is FOUND, this finds and DELETES the place data
+app.delete('/place/:placeid', deletePlace);
 
-async function deleteProfile(request, response, next) {
-  const id = request.params.profileid;
+async function deletePlace(request, response, next) {
+  const id = request.params.placeid;
   console.log('id: ')
   console.table(id);
   try {
-    await Profile.findByIdAndDelete(id);
+    Location.findByIdAndDelete(id);
     response.status(204).send('Success!');
   } catch (error) {
     next(error)
@@ -72,15 +75,15 @@ async function deleteProfile(request, response, next) {
 }
 
 
-//Once chosen profile is found, this UPDATES the profile with new data
-app.put('/profile/:profileid', putProfile)
+//Once chosen place is found, this UPDATES the place with new data
+app.put('/place/:placeid', putPlace)
 
-async function putProfile(request, response, next) {
-  let id = request.params.profileid;
+async function putPlace(request, response, next) {
+  let id = request.params.placeid;
   try {
     let data = request.body;
-    const updateProfile = await Profile.findByIdAndUpdate(id, data, {new: true, overwrite: true});
-    response.status(201).send(updateProfile);
+    const updatePlace = Location.findByIdAndUpdate(id, {...request.body, email: req.user.email}, data, {new: true, overwrite: true});
+    response.status(201).send(updatePlace);
   } catch (error) {
     next(error);
   }

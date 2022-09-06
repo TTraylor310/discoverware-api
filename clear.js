@@ -3,14 +3,14 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-mongoose.connect(process.env.PROFILE_DB_URL);
+mongoose.connect(process.env.LOCATION_DB_URL);
 
-const Profile = require('./modules/profile.js');
+const Location = require('./modules/place.js');
 
 async function clear() {
   try {
-    await Profile.deleteMany({});
-    console.log('Profile cleared from DB');
+    await Location.deleteMany({});
+    console.log('Location cleared from DB');
   } catch (err) {
     console.error(err);
   } finally {

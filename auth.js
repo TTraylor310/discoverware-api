@@ -18,13 +18,17 @@ function getKey(header, callback){
 }
 
 // this function will verify who the user on our route is (are the valid?)
-function verifyUser (req, errorFirstOrUserCallbackFunction) {
+function verifyUser (req, res, next) {
+  function valid(err, user) {
+    req.user = user;
+    next();
+  }
   try {
     const token = req.headers.authorization.split(' ')[1]
     console.log(token);
-    jwt.verify(token, getKey, {}, errorFirstOrUserCallbackFunction);
+    jwt.verify(token, getKey, {}, valid);
   } catch (error) {
-    errorFirstOrUserCallbackFunction('Not authorized');
+    console.log('Not authorized');
   }
 }
 

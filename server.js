@@ -6,6 +6,7 @@ const cors = require('cors');
 
 const mongoose = require('mongoose');
 
+const verifyUser = require('./auth.js')
 
 //Database for profile logins
 mongoose.connect(process.env.PROFILE_DB_URL);
@@ -28,12 +29,14 @@ app.get('/test', (req, res) => {
   res.send('test is good');
 });
 
+//Auth Middleware
+app.use(verifyUser);
 
 //Using profile.js, once profile is LOGGED, this retreives the profile.js data
 app.get('/profile', getProfile)
 async function getProfile(request, response, next) {
   try {
-    let results = await Profile.find();
+    let results = await Profile.find({email: req.user.email});
     response.status(200).send(results);
   } catch (error) {
     next(error);
@@ -47,7 +50,7 @@ async function postProfile(request, response, next) {
   console.log('request.body: ')
   console.table(request.body)
   try {
-    const newProfile = await Profile.create(request.body);
+    const newProfile = await Profile.create({...request.body, email: req.user.email});
     console.log('newProfile: ')
     console.table(newProfile)
     response.status(201).send(newProfile);
@@ -79,7 +82,7 @@ async function putProfile(request, response, next) {
   let id = request.params.profileid;
   try {
     let data = request.body;
-    const updateProfile = await Profile.findByIdAndUpdate(id, data, {new: true, overwrite: true});
+    const updateProfile = await Profile.findByIdAndUpdate(id, {...request.body, email: req.user.email}, data, {new: true, overwrite: true});
     response.status(201).send(updateProfile);
   } catch (error) {
     next(error);

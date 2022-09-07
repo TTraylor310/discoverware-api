@@ -24,9 +24,9 @@ function verifyUser (request, response, next) {
     next();
   }
   try {
-    console.log(request.headers);
+    // console.log(request.headers);
     const token = request.headers.authorization.split(' ')[1]
-    console.log(token);
+    // console.log(token);
     jwt.verify(token, getKey, {}, valid);
   } catch (error) {
     console.log('Not authorized: ', error);

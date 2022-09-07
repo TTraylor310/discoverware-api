@@ -3,12 +3,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-
 const mongoose = require('mongoose');
-
 const verifyUser = require('./auth.js')
 
-//Database for place logins
 mongoose.connect(process.env.LOCATION_DB_URL);
 
 const app = express();
@@ -21,19 +18,21 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () { console.log('Mongoose is connected');});
 
 
-//Sets variable Location to the Schema of place.js
 const Location = require('./modules/place.js')
+//Auth Middleware
+app.use(verifyUser);
 
 
 app.get('/test', (request, response) => {
   response.send('test is good');
 });
 
-//Auth Middleware
-app.use(verifyUser);
-
-//Using place.js, once place is LOGGED, this retreives the place.js data
 app.get('/place', getPlace)
+app.post('/place', postPlace);
+app.delete('/place/:placeid', deletePlace);
+app.put('/place/:placeid', putPlace)
+
+
 async function getPlace(request, response, next) {
   try {
     let results = await Location.find({email: request.user.email});
@@ -44,25 +43,26 @@ async function getPlace(request, response, next) {
   }
 }
 
-//Using place.js, once the place is FOUND, this creates the place.js data
-app.post('/place', postPlace);
-
 async function postPlace(request, response, next) {
   console.log('request.body: ')
   console.table(request.body)
   try {
-    const newPlace = await Location.create({...request.body, email: request.user.email});
-    //REMINDER: ADD FILTER TO CHECK FOR UNIQUE ID IDENTIFIER, PREVENT SAME DATA
-    console.log('newPlace: ')
-    console.table(newPlace)
-    response.status(201).send(newPlace);
+    const checkBody = request.body.place_id;
+    const checkDouble = await Location.find({place_id: checkBody});
+    const checkEmail = await Location.find ({email: request.user.email});
+    if (checkDouble.length === 0 && checkEmail.length === 0) {
+      const newPlace = await Location.create({...request.body, email: request.user.email});
+      //REMINDER: ADD FILTER TO CHECK FOR UNIQUE ID IDENTIFIER, PREVENT SAME DATA
+      console.log('newPlace: ')
+      console.table(newPlace)
+      response.status(201).send(newPlace);
+    } else {
+      response.status(201).send(checkDouble);
+    }
   } catch (error) {
     next(error);
   }
 }
-
-//Once the place is FOUND, this finds and DELETES the place data
-app.delete('/place/:placeid', deletePlace);
 
 async function deletePlace(request, response, next) {
   const id = request.params.placeid;
@@ -76,10 +76,6 @@ async function deletePlace(request, response, next) {
   }
 }
 
-
-//Once chosen place is found, this UPDATES the place with new data
-app.put('/place/:placeid', putPlace)
-
 async function putPlace(request, response, next) {
   let id = request.params.placeid;
   try {
@@ -90,6 +86,7 @@ async function putPlace(request, response, next) {
     next(error);
   }
 }
+
 
 
 //CATCH ALL, for everything else
@@ -103,4 +100,3 @@ app.use((error, request, response, next) => {
 
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
-

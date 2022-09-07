@@ -3,12 +3,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-
 const mongoose = require('mongoose');
+const verifyUser = require('./auth.js')
 
-
-//Database for profile logins
-mongoose.connect(process.env.PROFILE_DB_URL);
+mongoose.connect(process.env.LOCATION_DB_URL);
 
 const app = express();
 
@@ -20,71 +18,75 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () { console.log('Mongoose is connected');});
 
 
-//Sets variable Profile to the Schema of Profile.js
-const Profile = require('./modules/profile.js')
+const Location = require('./modules/place.js')
+//Auth Middleware
+app.use(verifyUser);
 
 
-app.get('/test', (req, res) => {
-  res.send('test is good');
+app.get('/test', (request, response) => {
+  response.send('test is good');
 });
 
+app.get('/place', getPlace)
+app.post('/place', postPlace);
+app.delete('/place/:placeid', deletePlace);
+app.put('/place/:placeid', putPlace)
 
-//Using profile.js, once profile is LOGGED, this retreives the profile.js data
-app.get('/profile', getProfile)
-async function getProfile(request, response, next) {
+
+async function getPlace(request, response, next) {
   try {
-    let results = await Profile.find();
+    let results = await Location.find({email: request.user.email});
+    console.log("this is what we're looking for:", results);
     response.status(200).send(results);
   } catch (error) {
     next(error);
   }
 }
 
-//Using profile.js, once the profile is FOUND, this creates the profile.js data
-app.post('/profile', postProfile);
-
-async function postProfile(request, response, next) {
+async function postPlace(request, response, next) {
   console.log('request.body: ')
   console.table(request.body)
   try {
-    const newProfile = await Profile.create(request.body);
-    console.log('newProfile: ')
-    console.table(newProfile)
-    response.status(201).send(newProfile);
+    const checkBody = request.body.place_id;
+    const checkDouble = await Location.find({place_id: checkBody});
+    const checkEmail = await Location.find ({email: request.user.email});
+    if (checkDouble.length === 0 && checkEmail.length === 0) {
+      const newPlace = await Location.create({...request.body, email: request.user.email});
+      //REMINDER: ADD FILTER TO CHECK FOR UNIQUE ID IDENTIFIER, PREVENT SAME DATA
+      console.log('newPlace: ')
+      console.table(newPlace)
+      response.status(201).send(newPlace);
+    } else {
+      response.status(201).send(checkDouble);
+    }
   } catch (error) {
     next(error);
   }
 }
 
-//Once the profile is FOUND, this finds and DELETES the profile data
-app.delete('/profile/:profileid', deleteProfile);
-
-async function deleteProfile(request, response, next) {
-  const id = request.params.profileid;
-  console.log('id: ')
+async function deletePlace(request, response, next) {
+  const id = request.params.placeid;
+  console.log('id: ');
   console.table(id);
   try {
-    await Profile.findByIdAndDelete(id);
+    Location.findByIdAndDelete(id);
     response.status(204).send('Success!');
   } catch (error) {
     next(error)
   }
 }
 
-
-//Once chosen profile is found, this UPDATES the profile with new data
-app.put('/profile/:profileid', putProfile)
-
-async function putProfile(request, response, next) {
-  let id = request.params.profileid;
+async function putPlace(request, response, next) {
+  let id = request.params.placeid;
   try {
     let data = request.body;
-    const updateProfile = await Profile.findByIdAndUpdate(id, data, {new: true, overwrite: true});
-    response.status(201).send(updateProfile);
+    const updatePlace = Location.findByIdAndUpdate(id, {...request.body, email: request.user.email}, data, {new: true, overwrite: true});
+    response.status(201).send(updatePlace);
   } catch (error) {
     next(error);
   }
 }
+
 
 
 //CATCH ALL, for everything else
@@ -98,4 +100,3 @@ app.use((error, request, response, next) => {
 
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
-

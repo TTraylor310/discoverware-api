@@ -26,7 +26,7 @@ const Location = require('./modules/place.js')
 
 
 app.get('/test', (request, response) => {
-  res.send('test is good');
+  response.send('test is good');
 });
 
 //Auth Middleware
@@ -36,7 +36,8 @@ app.use(verifyUser);
 app.get('/place', getPlace)
 async function getPlace(request, response, next) {
   try {
-    let results = Location.find({email: request.user.email});
+    let results = await Location.find({email: request.user.email});
+    console.log("this is what we're looking for:", results);
     response.status(200).send(results);
   } catch (error) {
     next(error);
@@ -51,6 +52,7 @@ async function postPlace(request, response, next) {
   console.table(request.body)
   try {
     const newPlace = await Location.create({...request.body, email: request.user.email});
+    //REMINDER: ADD FILTER TO CHECK FOR UNIQUE ID IDENTIFIER, PREVENT SAME DATA
     console.log('newPlace: ')
     console.table(newPlace)
     response.status(201).send(newPlace);

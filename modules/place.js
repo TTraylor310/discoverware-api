@@ -12,6 +12,7 @@ const locationSchema = new mongoose.Schema(
         types: {type: Array, required: true},
         lat: {type: Number, required: true},
         lng: {type: Number, required: true},
+        notes: {type: String},
         place_id: {type: String, required: true}
     }  
 );

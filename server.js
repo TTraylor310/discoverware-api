@@ -20,17 +20,17 @@ db.once('open', function () { console.log('Mongoose is connected');});
 
 const Location = require('./modules/place.js')
 //Auth Middleware
-app.use(verifyUser);
+// app.use(verifyUser);
 
 
 app.get('/test', (request, response) => {
   response.send('test is good');
 });
 
-app.get('/place', getPlace)
-app.post('/place', postPlace);
-app.delete('/place/:placeid', deletePlace);
-app.put('/place/:placeid', putPlace)
+app.get('/place', verifyUser, getPlace)
+app.post('/place', verifyUser, postPlace);
+app.delete('/place/:placeid', verifyUser, deletePlace);
+app.put('/place/:placeid', verifyUser, putPlace)
 
 
 async function getPlace(request, response, next) {

@@ -22,7 +22,9 @@ const Location = require('./modules/place.js')
 //Auth Middleware
 // app.use(verifyUser);
 
-
+app.get('/', (request, response) => {
+  response.send('Welcome to DiscoverWare');
+});
 app.get('/test', (request, response) => {
   response.send('test is good');
 });
@@ -44,17 +46,12 @@ async function getPlace(request, response, next) {
 }
 
 async function postPlace(request, response, next) {
-  console.log('request.body: ')
-  console.table(request.body)
   try {
     const checkBody = request.body.place_id;
     const checkDouble = await Location.find({place_id: checkBody});
     const checkEmail = await Location.find ({email: request.user.email});
     if (checkDouble.length === 0 && checkEmail.length === 0) {
       const newPlace = await Location.create({...request.body, email: request.user.email});
-      //REMINDER: ADD FILTER TO CHECK FOR UNIQUE ID IDENTIFIER, PREVENT SAME DATA
-      console.log('newPlace: ')
-      console.table(newPlace)
       response.status(201).send(newPlace);
     } else {
       response.status(201).send(checkDouble);
@@ -66,10 +63,8 @@ async function postPlace(request, response, next) {
 
 async function deletePlace(request, response, next) {
   const id = request.params.placeid;
-  console.log('id: ');
-  console.table(id);
   try {
-    Location.findByIdAndDelete(id);
+    await Location.findByIdAndDelete(id);
     response.status(204).send('Success!');
   } catch (error) {
     next(error)
@@ -79,8 +74,7 @@ async function deletePlace(request, response, next) {
 async function putPlace(request, response, next) {
   let id = request.params.placeid;
   try {
-    let data = request.body;
-    const updatePlace = Location.findByIdAndUpdate(id, {...request.body, email: request.user.email}, data, {new: true, overwrite: true});
+    const updatePlace = await Location.findByIdAndUpdate(id, {...request.body, email: request.user.email}, {new: true, overwrite: true});
     response.status(201).send(updatePlace);
   } catch (error) {
     next(error);

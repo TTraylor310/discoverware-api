@@ -36,6 +36,32 @@ async function seed() {
     })
     console.log('Location 2 was added')
 
+    await Location.create({
+        email: 'ttraylor83@gmail.com',
+        name: 'seattle',
+        address: '1234 street',
+        image: 'cat',
+        types: ['park', 'restaurant'],
+        lat: 10,
+        lng: 15,
+        notes: 'notes display',
+        place_id: 9876
+    })
+    console.log('Location 3 was added')
+
+    await Location.create({
+        email: 'brandenge@protonmail.com',
+        name: 'seattle',
+        address: '1234 street',
+        image: 'cat',
+        types: ['park', 'restaurant'],
+        lat: 10,
+        lng: 15,
+        notes: 'notes display',
+        place_id: 9876
+    })
+    console.log('Location 4 was added')
+
     mongoose.disconnect();
 }
 

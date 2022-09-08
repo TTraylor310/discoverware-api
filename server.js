@@ -17,7 +17,6 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () { console.log('Mongoose is connected');});
 
-
 const Location = require('./modules/place.js')
 //Auth Middleware
 // app.use(verifyUser);
@@ -34,11 +33,9 @@ app.post('/place', verifyUser, postPlace);
 app.delete('/place/:placeid', verifyUser, deletePlace);
 app.put('/place/:placeid', verifyUser, putPlace)
 
-
 async function getPlace(request, response, next) {
   try {
     let results = await Location.find({email: request.user.email});
-    console.log("this is what we're looking for:", results);
     response.status(200).send(results);
   } catch (error) {
     next(error);
@@ -48,12 +45,9 @@ async function getPlace(request, response, next) {
 async function postPlace(request, response, next) {
   try {
     const checkBody = request.body.place_id;
-    console.log('request id: ', checkBody);
     const checkDouble = await Location.find({place_id: checkBody, email: request.user.email});
-    console.log('checkdouble: ', checkDouble);
     if (checkDouble.length === 0) {
       const newPlace = await Location.create({...request.body, email: request.user.email});
-      console.log('newPlace: ', newPlace)
       response.status(201).send(newPlace);
     } else {
       response.status(201).send(checkDouble);

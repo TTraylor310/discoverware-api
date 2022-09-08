@@ -48,11 +48,9 @@ async function getPlace(request, response, next) {
 async function postPlace(request, response, next) {
   try {
     const checkBody = request.body.place_id;
-    console.log('check body: ', checkBody)
+    console.log('request id: ', checkBody);
     const checkDouble = await Location.find({place_id: checkBody, email: request.user.email});
-    console.log('checkdouble: ', checkDouble)
-    const checkEmail = await Location.find ({email: request.user.email});
-    console.log('checkEmail: ', checkEmail)
+    console.log('checkdouble: ', checkDouble);
     if (checkDouble.length === 0) {
       const newPlace = await Location.create({...request.body, email: request.user.email});
       console.log('newPlace: ', newPlace)

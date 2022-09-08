@@ -48,10 +48,14 @@ async function getPlace(request, response, next) {
 async function postPlace(request, response, next) {
   try {
     const checkBody = request.body.place_id;
-    const checkDouble = await Location.find({place_id: checkBody});
+    console.log('check body: ', checkBody)
+    const checkDouble = await Location.find({place_id: checkBody, email: request.user.email});
+    console.log('checkdouble: ', checkDouble)
     const checkEmail = await Location.find ({email: request.user.email});
-    if (checkDouble.length === 0 && checkEmail.length === 0) {
+    console.log('checkEmail: ', checkEmail)
+    if (checkDouble.length === 0) {
       const newPlace = await Location.create({...request.body, email: request.user.email});
+      console.log('newPlace: ', newPlace)
       response.status(201).send(newPlace);
     } else {
       response.status(201).send(checkDouble);

@@ -3,7 +3,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-mongoose.connect(process.env.LOCATION_DB_URL);
+mongoose.connect(process.env.MONGO_URI);
 
 const Location = require('./modules/place.js');
 
